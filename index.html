@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="sv">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Minispiele Sammlung</title>
+<title>Minispel Samling</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -67,7 +67,7 @@
     background-color: #2ecc71;
     cursor: default;
   }
-  /* Zahlenraten */
+  /* Gissa Nummer */
   #guessInput {
     width: 60px;
     font-size: 1.2rem;
@@ -76,15 +76,15 @@
 </head>
 <body>
 
-<h1>Minispiele Sammlung</h1>
+<h1>Minispel Samling</h1>
 <nav>
-  <button onclick="showGame('ticTacToe')">Tic-Tac-Toe</button>
-  <button onclick="showGame('guessNumber')">Zahlenraten</button>
+  <button onclick="showGame('ticTacToe')">Tre i rad</button>
+  <button onclick="showGame('guessNumber')">Gissa Nummer</button>
   <button onclick="showGame('memory')">Memory</button>
 </nav>
 
 <section id="gameContainer">
-  <!-- Spiele werden hier angezeigt -->
+  <!-- Spel visas här -->
 </section>
 
 <script>
@@ -100,20 +100,22 @@
     } else if (game === 'memory') {
       gameContainer.innerHTML = memoryHTML();
       initMemory();
+    } else {
+      gameContainer.innerHTML = '';
     }
   }
 
-  // --- TicTacToe ---
+  // --- Tre i rad ---
   function ticTacToeHTML() {
     return `
-      <h2>Tic-Tac-Toe</h2>
+      <h2>Tre i rad</h2>
       <div id="ticTacToeBoard">
         <div data-cell="0"></div><div data-cell="1"></div><div data-cell="2"></div>
         <div data-cell="3"></div><div data-cell="4"></div><div data-cell="5"></div>
         <div data-cell="6"></div><div data-cell="7"></div><div data-cell="8"></div>
       </div>
       <p id="ticTacToeStatus"></p>
-      <button onclick="showGame('')">Zurück zur Auswahl</button>
+      <button onclick="showGame('')">Tillbaka till val</button>
     `;
   }
 
@@ -126,9 +128,9 @@
 
     function checkWin(player) {
       const wins = [
-        [0,1,2],[3,4,5],[6,7,8], // Reihen
-        [0,3,6],[1,4,7],[2,5,8], // Spalten
-        [0,4,8],[2,4,6]          // Diagonalen
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
       ];
       return wins.some(line => line.every(i => board[i] === player));
     }
@@ -145,30 +147,30 @@
       e.target.classList.add('disabled');
 
       if (checkWin(currentPlayer)) {
-        status.textContent = `Spieler ${currentPlayer} gewinnt!`;
+        status.textContent = `Spelare ${currentPlayer} vinner!`;
         gameOver = true;
       } else if (checkDraw()) {
-        status.textContent = 'Unentschieden!';
+        status.textContent = 'Oavgjort!';
         gameOver = true;
       } else {
         currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        status.textContent = `Spieler ${currentPlayer} ist dran.`;
+        status.textContent = `Spelare ${currentPlayer} är nästa.`;
       }
     }
 
     cells.forEach(cell => cell.addEventListener('click', handleClick));
-    status.textContent = `Spieler ${currentPlayer} ist dran.`;
+    status.textContent = `Spelare ${currentPlayer} är nästa.`;
   }
 
-  // --- Zahlenraten ---
+  // --- Gissa Nummer ---
   function guessNumberHTML() {
     return `
-      <h2>Zahlenraten</h2>
-      <p>Ich denke an eine Zahl zwischen 1 und 100. Versuch sie zu erraten!</p>
+      <h2>Gissa Nummer</h2>
+      <p>Jag tänker på ett nummer mellan 1 och 100. Försök att gissa!</p>
       <input id="guessInput" type="number" min="1" max="100" />
-      <button id="guessBtn">Raten</button>
+      <button id="guessBtn">Gissa</button>
       <p id="guessResult"></p>
-      <button onclick="showGame('')">Zurück zur Auswahl</button>
+      <button onclick="showGame('')">Tillbaka till val</button>
     `;
   }
 
@@ -181,16 +183,16 @@
     btn.onclick = () => {
       const guess = Number(input.value);
       if (!guess || guess < 1 || guess > 100) {
-        result.textContent = 'Bitte gib eine Zahl zwischen 1 und 100 ein.';
+        result.textContent = 'Vänligen ange ett nummer mellan 1 och 100.';
         return;
       }
       if (guess === secret) {
-        result.textContent = 'Richtig! Du hast die Zahl erraten!';
+        result.textContent = 'Rätt! Du gissade numret!';
         btn.disabled = true;
       } else if (guess < secret) {
-        result.textContent = 'Zu klein!';
+        result.textContent = 'För lågt!';
       } else {
-        result.textContent = 'Zu groß!';
+        result.textContent = 'För högt!';
       }
       input.value = '';
       input.focus();
@@ -201,10 +203,10 @@
   function memoryHTML() {
     return `
       <h2>Memory</h2>
-      <p>Finde alle Paare!</p>
+      <p>Hitta alla par!</p>
       <div id="memoryBoard"></div>
       <p id="memoryStatus"></p>
-      <button onclick="showGame('')">Zurück zur Auswahl</button>
+      <button onclick="showGame('')">Tillbaka till val</button>
     `;
   }
 
@@ -214,7 +216,6 @@
     let flipped = [];
     let matched = [];
 
-    // Karten mischen
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -238,13 +239,13 @@
         const [a, b] = flipped;
         if (board[a] === board[b]) {
           matched.push(a,b);
-          status.textContent = 'Paar gefunden!';
+          status.textContent = 'Par hittat!';
           flipped = [];
           if (matched.length === board.length) {
-            status.textContent = 'Glückwunsch, du hast alle Paare gefunden!';
+            status.textContent = 'Grattis, du hittade alla par!';
           }
         } else {
-          status.textContent = 'Nicht passend!';
+          status.textContent = 'Inte match!';
           setTimeout(() => {
             flipped = [];
             render();
@@ -272,7 +273,6 @@
 
     render();
   }
-
 </script>
 
 </body>
