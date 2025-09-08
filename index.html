@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Minispiele Sammlung</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 0 10px;
+  }
+  h1 {
+    text-align: center;
+  }
+  nav button {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  section {
+    margin-top: 20px;
+  }
+  /* TicTacToe Styles */
+  #ticTacToeBoard {
+    display: grid;
+    grid-template-columns: repeat(3, 80px);
+    grid-template-rows: repeat(3, 80px);
+    gap: 5px;
+    justify-content: center;
+    margin: 0 auto;
+  }
+  #ticTacToeBoard div {
+    background: #eee;
+    font-size: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  #ticTacToeBoard div.disabled {
+    cursor: default;
+    color: #555;
+  }
+  /* Memory Styles */
+  #memoryBoard {
+    display: grid;
+    grid-template-columns: repeat(4, 70px);
+    grid-gap: 10px;
+    justify-content: center;
+  }
+  .memoryCard {
+    width: 70px;
+    height: 70px;
+    background-color: #3498db;
+    color: white;
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .memoryCard.flipped {
+    background-color: #2ecc71;
+    cursor: default;
+  }
+  /* Zahlenraten */
+  #guessInput {
+    width: 60px;
+    font-size: 1.2rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>Minispiele Sammlung</h1>
+<nav>
+  <button onclick="showGame('ticTacToe')">Tic-Tac-Toe</button>
+  <button onclick="showGame('guessNumber')">Zahlenraten</button>
+  <button onclick="showGame('memory')">Memory</button>
+</nav>
+
+<section id="gameContainer">
+  <!-- Spiele werden hier angezeigt -->
+</section>
+
+<script>
+  const gameContainer = document.getElementById('gameContainer');
+
+  function showGame(game) {
+    if (game === 'ticTacToe') {
+      gameContainer.innerHTML = ticTacToeHTML();
+      initTicTacToe();
+    } else if (game === 'guessNumber') {
+      gameContainer.innerHTML = guessNumberHTML();
+      initGuessNumber();
+    } else if (game === 'memory') {
+      gameContainer.innerHTML = memoryHTML();
+      initMemory();
+    }
+  }
+
+  // --- TicTacToe ---
+  function ticTacToeHTML() {
+    return `
+      <h2>Tic-Tac-Toe</h2>
+      <div id="ticTacToeBoard">
+        <div data-cell="0"></div><div data-cell="1"></div><div data-cell="2"></div>
+        <div data-cell="3"></div><div data-cell="4"></div><div data-cell="5"></div>
+        <div data-cell="6"></div><div data-cell="7"></div><div data-cell="8"></div>
+      </div>
+      <p id="ticTacToeStatus"></p>
+      <button onclick="showGame('')">Zurück zur Auswahl</button>
+    `;
+  }
+
+  function initTicTacToe() {
+    const board = Array(9).fill(null);
+    let currentPlayer = 'X';
+    let gameOver = false;
+    const cells = document.querySelectorAll('#ticTacToeBoard div');
+    const status = document.getElementById('ticTacToeStatus');
+
+    function checkWin(player) {
+      const wins = [
+        [0,1,2],[3,4,5],[6,7,8], // Reihen
+        [0,3,6],[1,4,7],[2,5,8], // Spalten
+        [0,4,8],[2,4,6]          // Diagonalen
+      ];
+      return wins.some(line => line.every(i => board[i] === player));
+    }
+
+    function checkDraw() {
+      return board.every(cell => cell !== null);
+    }
+
+    function handleClick(e) {
+      const idx = +e.target.dataset.cell;
+      if (gameOver || board[idx] !== null) return;
+      board[idx] = currentPlayer;
+      e.target.textContent = currentPlayer;
+      e.target.classList.add('disabled');
+
+      if (checkWin(currentPlayer)) {
+        status.textContent = `Spieler ${currentPlayer} gewinnt!`;
+        gameOver = true;
+      } else if (checkDraw()) {
+        status.textContent = 'Unentschieden!';
+        gameOver = true;
+      } else {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        status.textContent = `Spieler ${currentPlayer} ist dran.`;
+      }
+    }
+
+    cells.forEach(cell => cell.addEventListener('click', handleClick));
+    status.textContent = `Spieler ${currentPlayer} ist dran.`;
+  }
+
+  // --- Zahlenraten ---
+  function guessNumberHTML() {
+    return `
+      <h2>Zahlenraten</h2>
+      <p>Ich denke an eine Zahl zwischen 1 und 100. Versuch sie zu erraten!</p>
+      <input id="guessInput" type="number" min="1" max="100" />
+      <button id="guessBtn">Raten</button>
+      <p id="guessResult"></p>
+      <button onclick="showGame('')">Zurück zur Auswahl</button>
+    `;
+  }
+
+  function initGuessNumber() {
+    const secret = Math.floor(Math.random() * 100) + 1;
+    const input = document.getElementById('guessInput');
+    const btn = document.getElementById('guessBtn');
+    const result = document.getElementById('guessResult');
+
+    btn.onclick = () => {
+      const guess = Number(input.value);
+      if (!guess || guess < 1 || guess > 100) {
+        result.textContent = 'Bitte gib eine Zahl zwischen 1 und 100 ein.';
+        return;
+      }
+      if (guess === secret) {
+        result.textContent = 'Richtig! Du hast die Zahl erraten!';
+        btn.disabled = true;
+      } else if (guess < secret) {
+        result.textContent = 'Zu klein!';
+      } else {
+        result.textContent = 'Zu groß!';
+      }
+      input.value = '';
+      input.focus();
+    };
+  }
+
+  // --- Memory ---
+  function memoryHTML() {
+    return `
+      <h2>Memory</h2>
+      <p>Finde alle Paare!</p>
+      <div id="memoryBoard"></div>
+      <p id="memoryStatus"></p>
+      <button onclick="showGame('')">Zurück zur Auswahl</button>
+    `;
+  }
+
+  function initMemory() {
+    const cards = ['🍎','🍎','🍌','🍌','🍇','🍇','🍒','🍒'];
+    let board = [];
+    let flipped = [];
+    let matched = [];
+
+    // Karten mischen
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+    board = shuffle(cards.slice());
+
+    const boardDiv = document.getElementById('memoryBoard');
+    boardDiv.innerHTML = '';
+    const status = document.getElementById('memoryStatus');
+    status.textContent = '';
+
+    function flipCard(i) {
+      if (flipped.length === 2 || matched.includes(i)) return;
+      if (flipped.includes(i)) return;
+      flipped.push(i);
+      render();
+      if (flipped.length === 2) {
+        const [a, b] = flipped;
+        if (board[a] === board[b]) {
+          matched.push(a,b);
+          status.textContent = 'Paar gefunden!';
+          flipped = [];
+          if (matched.length === board.length) {
+            status.textContent = 'Glückwunsch, du hast alle Paare gefunden!';
+          }
+        } else {
+          status.textContent = 'Nicht passend!';
+          setTimeout(() => {
+            flipped = [];
+            render();
+            status.textContent = '';
+          }, 1000);
+        }
+      }
+    }
+
+    function render() {
+      boardDiv.innerHTML = '';
+      board.forEach((symbol, i) => {
+        const card = document.createElement('div');
+        card.className = 'memoryCard';
+        if (matched.includes(i) || flipped.includes(i)) {
+          card.textContent = symbol;
+          card.classList.add('flipped');
+        } else {
+          card.textContent = '';
+        }
+        card.onclick = () => flipCard(i);
+        boardDiv.appendChild(card);
+      });
+    }
+
+    render();
+  }
+
+</script>
+
+</body>
+</html>
